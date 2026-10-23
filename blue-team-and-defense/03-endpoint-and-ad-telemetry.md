@@ -38,13 +38,13 @@ La preuve irréfutable de l'attaque Kerberoasting réside dans le champ `Ticket 
 
 **Contexte :** L'attaquant, désormais muni d'un compte administrateur (`t.wellick`), a ciblé le serveur de management `LAN-WIN-MGMT01` (Phase 4). Pour voler les identifiants en mémoire sans déclencher l'antivirus ni écrire sur le disque, un script PowerShell "Fileless" a été utilisé. 
 
-**Analyse :**
-
 L'attaquant a utilisé du code C# compilé à la volée (P/Invoke) appelant l'API native `MiniDumpWriteDump` avec des droits d'accès spécifiques (`Option.WithFullMemory`). Cette technique a réussi à contourner l'antivirus Windows Defender, mais la stratégie de "Défense en Profondeur" mise en place via GPO a permis de capturer l'attaque.
 
 ![Interception du script fileless via audit PowerShell](../images/blue-team/03-mgmt-powershell-lsass-4104.png)
 
-Grâce à l'activation du *PowerShell Script Block Logging* (Event 4104), le système a intercepté et enregistré le code source malveillant complet à 21:56:03, à l'instant exact de son injection dynamique en mémoire. Cette télémétrie pallie la furtivité de l'exécution mémoire et offre au SOC le script exact utilisé pour corrompre le processus `lsass.exe`.
+**Analyse :**
+
+Grâce à l'activation du *PowerShell Script Block Logging* (Event 4104), le système a intercepté et enregistré le code source malveillant complet à **21:56:03**, à l'instant exact de son injection dynamique en mémoire. Cette télémétrie pallie la furtivité de l'exécution mémoire et offre au SOC le script exact utilisé pour corrompre le processus `lsass.exe`.
 
 ---
 
