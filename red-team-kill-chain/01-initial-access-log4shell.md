@@ -9,14 +9,15 @@
 
 ## 1. Détection et validation de la vulnérabilité
 
-L'application web cible (Portail E Corp) est hébergée dans la DMZ à l'adresse `http://192.168.1.200:8443`. L'analyse de la surface d'attaque via Burp Suite permet d'identifier une vulnérabilité critique d'exécution de code à distance (RCE) liée à la bibliothèque Log4j.
+L'application web cible (Portail E Corp) est hébergée dans la DMZ à l'adresse `http://192.168.1.200:8443`
 
-**Analyse du trafic :**
-Une tentative de connexion standard génère une requête HTTP `POST` vers l'endpoint `/api/login`. L'utilisation de l'extension *Log4Shell Scanner*, sur Burp Suite, en mode "Active Scan" permet précisement de cibler spécifiquement l'analyse sur le paramètre JSON `username`. 
+![Interface de connexion du portail E Corp](../images/red-team/01-ecorp-portal-login.png)
 
-Il s'avère que l'application journalise ce champ d'entrée utilisateur sans aucune sanitisation préalable, ce qui crée un point d'injection JNDI (Java Naming and Directory Interface) direct.
+Un scan automatisé initial lancé avec **Burp Suite** sur la racine du site ne révèle aucune faille évidente. L'exécution d'une tentative de connexion manuelle révèle cependant une requête HTTP POST vers l'endpoint `/api/login`. En soumettant spécifiquement cette requête à l'analyseur actif équipé de l'**extension Log4Shell Scanner**, l'outil identifie le paramètre JSON `username` comme étant vulnérable à une injection JNDI liée à la bibliothèque Log4j.
 
-Afin de confirmer la possibilité d'exécution de code de manière aveugle (Blind RCE) et de s'assurer que le serveur cible a la capacité de résoudre des requêtes externes, un payload de validation pointant vers un serveur de test (Interactsh) est envoyé :
+L'application semble ainsi journaliser ce champ sans aucune sanitisation préalable; ce qui permet une exécution de code à distance (RCE).
+
+Afin de confirmer cette possibilité de RCE et de s'assurer que le serveur cible a la capacité de résoudre des requêtes externes, un payload de validation pointant vers un serveur de test (Interactsh) est envoyé :
 
 ```bash
 curl -X POST http://192.168.1.200:8443/api/login \
